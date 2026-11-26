@@ -72,8 +72,7 @@ input,textarea,select{width:100%;padding:10px;margin:4px 0 10px;border:1px solid
 const SB_URL='https://jvfcguvmpnsgvrjzfczh.supabase.co', SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2ZmNndXZtcG5zZ3ZyanpmY3poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3MTIzODMsImV4cCI6MjExMTI4ODM4M30.WX8WmVCYEAQoqbH0SimqgBhienSAxxoPh_yPMCKW5mo';
 // ============================================
 const WA='94713166560';
-const sb=supabase.createClient(SB_URL,SB_KEY);
-const $=s=>document.querySelector(s);
+const sb=supabase.createClient((()=>{let u=SB_URL.trim();if(!u.includes('.'))u='https://'+u+'.supabase.co';if(!/^https?:/.test(u))u='https://'+u;return new URL(u).origin})(),SB_KEY.trim());const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const T={
 news:{n:'News',f:[['title','Title'],['body','Announcement text','area'],['image','Photo (optional)','file']]},
