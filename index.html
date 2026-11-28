@@ -74,6 +74,8 @@ nav a.on{color:var(--ac);font-weight:700}
 .ln{padding:8px 0;border-bottom:1px solid var(--bd);font:.9rem system-ui,sans-serif}.ln b{display:inline-block;min-width:56px}.ln a{cursor:pointer}.lines{margin-bottom:14px}
 @media(max-width:820px){.an,.bcw,.split{grid-template-columns:1fr}.prof{flex-direction:column}}
 .pw{font:.8rem system-ui,sans-serif;color:var(--mu);margin:4px 0 12px}.live{animation:bl 1.4s infinite}@keyframes bl{50%{opacity:.4}}
+.rt{display:flex;gap:8px;margin:6px 0}.rt span{flex:1;text-align:center;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:5px 2px}.rt b{display:block;font:700 1.05rem system-ui,sans-serif;color:var(--ac)}.rt small{font:.7rem system-ui,sans-serif;color:var(--mu)}.c .rt{padding:0;flex-direction:row;flex:none;gap:8px}
+.row .ghost{background:transparent;color:var(--ac);border:1px solid var(--bd)}.olds{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.ol{display:flex;flex-direction:column;gap:4px;font-size:.8rem;align-items:center}.ol img{height:56px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -99,7 +101,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const T={
 news:{n:'News',f:[['title','Title'],['body','Announcement text','area'],['image','Photo (optional)','file']]},
 events:{n:'Events',f:[['title','Event title'],['date','Date'],['description','Description','area'],['photos','Event photos (select many)','files']]},
-players:{n:'Players',f:[['name','Name'],['title','Title (e.g. Captain)'],['description','Short description','area'],['photo','Photo','file']]},
+players:{n:'Players',f:[['name','Name'],['title','Title (e.g. Captain)'],['standard','Standard rating'],['rapid','Rapid rating'],['blitz','Blitz rating'],['description','Short description','area'],['photo','Photo','file']]},
 directory:{n:'Directory',f:[['name','Name'],['title','Title / Role'],['description','Short description','area'],['contact','Contact (phone / email)'],['photo','Photo','file']]},
 shop:{n:'Shop',f:[['name','Item name'],['price','Price (Rs.)'],['description','Description','area'],['photos','Item photos (select many, first is the main photo)','files']]}
 };
@@ -110,14 +112,15 @@ const pics=x=>x.photos&&x.photos.length?x.photos:(x.photo?[x.photo]:(x.image?[x.
 const isP=t=>t=='players'||t=='directory'||t=='shop';
 const WAL=x=>`https://wa.me/${WA}?text=${encodeURIComponent('Hello Victory Chess Club, I want to buy: '+x.name+' (Rs. '+x.price+')')}`;
 const fmtD=ms=>ms?new Date(ms).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'';
+const rat=x=>(x.standard||x.rapid||x.blitz)?`<div class="rt">${[['Standard',x.standard],['Rapid',x.rapid],['Blitz',x.blitz]].map(r=>`<span><b>${esc(r[1]||'–')}</b><small>${r[0]}</small></span>`).join('')}</div>`:'';
 const card=(t,x)=>{const s=x.date||(t=='news'?new Date(x.created_at).toLocaleDateString():(t=='players'||t=='directory'?x.title:''));
- return `<a class="c" href="#${t}/${x.id}">${img(pics(x)[0])}<div><small>${esc(s)}</small><h3>${esc(isP(t)?x.name:x.title)}</h3>${t=='shop'?`<span class="pr">Rs. ${esc(x.price)}</span>`:''}<p>${esc(ex(x.body||x.description))}</p></div></a>`};
+ return `<a class="c" href="#${t}/${x.id}">${img(pics(x)[0])}<div><small>${esc(s)}</small><h3>${esc(isP(t)?x.name:x.title)}</h3>${t=='shop'?`<span class="pr">Rs. ${esc(x.price)}</span>`:''}${t=='players'?rat(x):''}<p>${esc(ex(x.body||x.description))}</p></div></a>`};
 const grid=(t,k)=>`<div class="g">${(D[t]||[]).slice(0,k).map(x=>card(t,x)).join('')||'<p class="em">Nothing here yet.</p>'}</div>`;
 const sec=(t,k)=>`<section><h2>${T[t].n}</h2>${grid(t,k)}<p><a href="#${t}">See all ${T[t].n} →</a></p></section>`;
 const det=(t,x)=>{const P=pics(x),name=isP(t)?x.name:x.title,tx=esc(x.body||x.description||'');
  const chip=t=='news'?new Date(x.created_at).toLocaleDateString():t=='events'?x.date:(x.title||'');let b;
  if(t=='shop')b=`<div class="split"><div><img id="mi" class="mi" src="${esc(P[0]||'')}" alt="">${P.length>1?`<div class="ths">${P.map(u=>`<img class="th" src="${esc(u)}" onclick="mi.src=this.src" alt="">`).join('')}</div>`:''}</div><div><div class="pr big">Rs. ${esc(x.price)}</div><p class="tx">${tx}</p><a class="btn" target="_blank" rel="noopener" href="${WAL(x)}">Order on WhatsApp</a></div></div>`;
- else if(t=='players'||t=='directory')b=`<div class="prof">${P[0]?`<img class="avt" src="${esc(P[0])}" alt="">`:''}<div><p class="tx">${tx}</p>${x.contact?`<p class="chip">${esc(x.contact)}</p>`:''}</div></div>`;
+ else if(t=='players'||t=='directory')b=`<div class="prof">${P[0]?`<img class="avt" src="${esc(P[0])}" alt="">`:''}<div>${t=='players'?rat(x):''}<p class="tx">${tx}</p>${x.contact?`<p class="chip">${esc(x.contact)}</p>`:''}</div></div>`;
  else b=(P[0]&&t=='news'?`<img class="cov" src="${esc(P[0])}" alt="">`:'')+`<p class="tx">${tx}</p>`+(t=='events'?`<div class="g">${P.map(u=>`<div class="c">${img(u)}<div><button onclick="dl('${esc(u)}')">Download</button></div></div>`).join('')}</div>`:'');
  return `<section class="art"><a class="bk" href="#${t}">← ${T[t].n}</a>${chip?`<div class="chip">${esc(chip)}</div>`:''}<h1>${esc(name)}</h1><hr class="ac">${b}</section>`};
 // ===== chess board + viewer =====
@@ -218,11 +221,12 @@ async function admin(){
  await load(cur);
  const t=T[cur];
  m.innerHTML=`<div class="ad"><h2>Admin</h2><button class="ghost" onclick="logout()">Log out</button> <a href="#">View site</a>
- <div class="tabs">${Object.keys(T).map(k=>`<button class="${k==cur?'on':'ghost'}" onclick="cur='${k}';admin()">${T[k].n}</button>`).join('')}</div>
- <h3>Add to ${t.n}</h3>
+ <div class="tabs">${Object.keys(T).map(k=>`<button class="${k==cur?'on':'ghost'}" onclick="cur='${k}';EDIT=null;admin()">${T[k].n}</button>`).join('')}</div>
+ <h3>${EDIT?'Edit':'Add to'} ${t.n}</h3>
  <div id="fm">${t.f.map(([k,l,ty])=>`<label>${l}${ty=='area'?`<textarea id="f-${k}" rows="3"></textarea>`:ty=='file'?`<input id="f-${k}" type="file" accept="image/*">`:ty=='files'?`<input id="f-${k}" type="file" accept="image/*" multiple>`:`<input id="f-${k}">`}</label>`).join('')}
- <button id="sv" onclick="save()">Save</button> <span id="ms" class="mu"></span></div>
- <h3>Existing</h3>${D[cur].map(x=>`<div class="row"><span>${esc(x.title||x.name)}</span><button onclick="del(${x.id})">Delete</button></div>`).join('')||'<p class="em">Empty.</p>'}</div>`;
+ <button id="sv" onclick="save()">${EDIT?'Save changes':'Save'}</button> ${EDIT?'<button class="ghost" onclick="EDIT=null;admin()">Cancel</button>':''} <span id="ms" class="mu"></span></div>
+ <h3>Existing</h3>${D[cur].map(x=>`<div class="row"><span>${esc(x.title||x.name)}</span><span><button class="ghost" onclick="edit(${x.id})">Edit</button> <button onclick="del(${x.id})">Delete</button></span></div>`).join('')||'<p class="em">Empty.</p>'}</div>`;
+ fillEdit();
 }
 async function login(){
  const {error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});
@@ -235,19 +239,21 @@ async function up(f){
  if(error)throw error;
  return sb.storage.from('media').getPublicUrl(n).data.publicUrl;
 }
+let EDIT=null;
+function edit(id){EDIT=D[cur].find(x=>x.id==id);admin();scrollTo(0,0)}
+function fillEdit(){if(!EDIT)return;for(const [k,,ty] of T[cur].f){const el=$('#f-'+k);
+ if(ty=='file'){if(EDIT[k])el.insertAdjacentHTML('afterend','<small class="mu">Current photo stays unless you choose a new one.</small>')}
+ else if(ty=='files'){const old=EDIT[k]||(k=='photos'&&EDIT.photo?[EDIT.photo]:[]);el.insertAdjacentHTML('afterend',`<div id="o-${k}" class="olds">${old.map(u=>`<label class="ol"><img src="${esc(u)}" alt=""><span><input type="checkbox" value="${esc(u)}" style="width:auto;margin:0"> remove</span></label>`).join('')}</div>`)}
+ else el.value=EDIT[k]??''}}
 async function save(){
  const ms=$('#ms'),b=$('#sv');b.disabled=true;ms.textContent='Saving…';
- try{
-  const row={};
-  for(const [k,,ty] of T[cur].f){
-   const el=$('#f-'+k);
-   if(ty=='file') row[k]=el.files[0]?await up(el.files[0]):null;
-   else if(ty=='files'){row[k]=[];for(const f of el.files){ms.textContent='Uploading '+(row[k].length+1)+'/'+el.files.length+'…';row[k].push(await up(f))}}
-   else row[k]=el.value;
-  }
-  const {error}=await sb.from(cur).insert(row);
-  if(error)throw error;
-  admin();
+ try{const row={};
+  for(const [k,,ty] of T[cur].f){const el=$('#f-'+k);
+   if(ty=='file')row[k]=el.files[0]?await up(el.files[0]):((EDIT?EDIT[k]:null)||null);
+   else if(ty=='files'){const old=EDIT?(EDIT[k]||(k=='photos'&&EDIT.photo?[EDIT.photo]:[])):[],rm=[...document.querySelectorAll('#o-'+k+' input:checked')].map(i=>i.value);row[k]=old.filter(u=>!rm.includes(u));for(const f of el.files){ms.textContent='Uploading '+(row[k].length+1)+'…';row[k].push(await up(f))}}
+   else row[k]=el.value}
+  const {error}=EDIT?await sb.from(cur).update(row).eq('id',EDIT.id):await sb.from(cur).insert(row);
+  if(error)throw error;EDIT=null;admin()
  }catch(e){ms.textContent='Error: '+(e.message||e);b.disabled=false}
 }
 async function del(id){
