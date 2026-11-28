@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Victory Chess Club</title>
 <link rel="icon" href="icon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#0a0f2c;--card:#131b45;--tx:#eef2ff;--mu:#a9b8e8;--ac:#8fb3ff;--bd:#25306b;--bt:#8fb3ff;--bx:#0a0f2c}
@@ -45,23 +46,45 @@ input,textarea,select{width:100%;padding:10px;margin:4px 0 10px;border:1px solid
 .tabs .on{background:var(--ac);color:#fff}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
 .row button{background:#b3261e;color:#fff;padding:5px 10px}
-a.c{text-decoration:none;color:inherit}a.c:hover{border-color:var(--ac)}.c h3{color:var(--ac)}
-.art{max-width:760px}.mi{width:100%;border-radius:12px;margin:12px 0;max-height:480px;object-fit:contain;background:var(--card)}
-.ths{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px}.th{height:64px;border-radius:8px;cursor:pointer;border:2px solid var(--bd)}
-.tx{white-space:pre-line}.fr{width:100%;height:min(95vw,560px);border:0;border-radius:12px;margin:10px 0}
-.wl{list-style:none;padding:0;margin:0 0 8px}.wl li{padding:8px 0;border-bottom:1px solid var(--bd)}
+body::before,body::after{position:fixed;pointer-events:none;z-index:0;color:var(--ac);opacity:.045;font-family:'Segoe UI Symbol','Noto Sans Symbols 2',serif;line-height:1}
+body::before{content:'♞';right:-3vmin;bottom:-6vmin;font-size:62vmin}body::after{content:'♔';left:-4vmin;top:14vmin;font-size:34vmin}
+main,footer,header{position:relative;z-index:1}header{position:sticky}
+a.c{text-decoration:none;color:inherit;transition:transform .15s,border-color .15s}a.c:hover{border-color:var(--ac);transform:translateY(-2px)}.c h3{color:var(--ac)}
+.art{max-width:760px}.art.wide{max-width:1050px}.bk{font:600 .85rem system-ui,sans-serif;text-decoration:none}
+.art h1{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.15;margin:.4em 0 .2em}hr.ac{border:0;height:3px;width:64px;background:var(--ac);margin:12px 0 22px;border-radius:2px}
+.chip{display:inline-block;margin:14px 0 0;padding:3px 12px;border:1px solid var(--bd);border-radius:20px;color:var(--mu);font:.8rem system-ui,sans-serif;background:var(--card)}
+.lead{color:var(--mu);font-size:1.05rem;max-width:680px}.tx{white-space:pre-line;font-size:1.08rem;line-height:1.75}
+.cov{width:100%;max-height:440px;object-fit:cover;border-radius:14px;margin:0 0 22px;box-shadow:0 10px 30px #0004}
+.mi{width:100%;border-radius:14px;max-height:480px;object-fit:contain;background:var(--card);border:1px solid var(--bd)}
+.ths{display:flex;gap:8px;overflow-x:auto;margin-top:10px}.th{height:64px;border-radius:8px;cursor:pointer;border:2px solid var(--bd)}.th:hover{border-color:var(--ac)}
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}.pr.big{font-size:1.9rem;margin-bottom:10px}
+.prof{display:flex;gap:22px;align-items:flex-start}.avt{width:160px;height:160px;border-radius:50%;object-fit:cover;border:3px solid var(--ac);flex:none}
+.sh{margin:22px 0 10px;color:var(--mu);font:600 .8rem system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em}.live{color:#e5484d;font-weight:700}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px}.tb{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;text-decoration:none;font:600 .85rem system-ui,sans-serif;background:var(--card);color:var(--tx)}.tb.on{background:var(--ac);color:var(--bx);border-color:var(--ac)}
+nav a.on{color:var(--ac);font-weight:700}
+.bcw{display:grid;grid-template-columns:270px 1fr;gap:20px}.gl{max-height:640px;overflow:auto;border:1px solid var(--bd);border-radius:10px;background:var(--card)}
+.gm{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;padding:9px 12px;border-bottom:1px solid var(--bd);text-decoration:none;color:var(--tx);font:.85rem system-ui,sans-serif}.gm span:last-child{text-align:right}.gm.on{background:var(--ac);color:var(--bx)}.gt{margin:0 0 10px;font-size:1.1rem}
+.bw{display:flex;gap:6px;max-width:600px}.bd{display:grid;grid-template-columns:repeat(8,1fr);flex:1;aspect-ratio:1;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px #0006;user-select:none}
+.sq{display:grid;place-items:center;position:relative;font-size:clamp(22px,6.2vw,52px);cursor:pointer}.sq.l{background:#dce9fb}.sq.d{background:#5b87c9}
+.sq i{font-style:normal;line-height:1}.sq i.w{color:#fff;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000}.sq i.b{color:#0a1f4d;text-shadow:0 0 1px #fff}
+.sq.lm{box-shadow:inset 0 0 0 100px rgba(255,214,10,.4)}.sq.sel{box-shadow:inset 0 0 0 100px rgba(255,214,10,.6)}.sq.hint::after{content:'';width:28%;height:28%;border-radius:50%;background:rgba(10,31,77,.4);position:absolute}
+.evb{width:14px;background:#0a1f4d;border-radius:5px;display:flex;align-items:flex-end;overflow:hidden}.evb b{display:block;width:100%;height:50%;background:#fff;transition:height .3s}
+.ctl{display:flex;gap:6px;margin:10px 0}.mv{max-height:200px;overflow:auto;font:.9rem system-ui,sans-serif;line-height:2.1;max-width:600px}.mv a{cursor:pointer;padding:2px 6px;border-radius:5px}.mv a.cur{background:var(--ac);color:var(--bx)}.mn{color:var(--mu);margin-left:4px}
+.an{display:grid;grid-template-columns:minmax(0,600px) 1fr;gap:24px}.opn{font:700 1rem system-ui,sans-serif;color:var(--ac);min-height:1.5em;margin-bottom:8px}
+.ln{padding:8px 0;border-bottom:1px solid var(--bd);font:.9rem system-ui,sans-serif}.ln b{display:inline-block;min-width:56px}.ln a{cursor:pointer}.lines{margin-bottom:14px}
+@media(max-width:820px){.an,.bcw,.split{grid-template-columns:1fr}.prof{flex-direction:column}}
 </style>
 </head>
 <body>
 <header>
-<a class="b" href="#"><img class="lg" src="logo(1).png" alt="">Victory Chess Club</a>
-<nav><a href="#news">News</a><a href="#events">Events</a><a href="#players">Players</a><a href="#directory">Directory</a><a href="#shop">Shop</a><a href="#watch">Watch</a><a href="#analysis">Analysis</a></nav>
+<a class="b" href="#"><img class="lg" src="icon.png" alt="">Victory Chess Club</a>
+<nav><a href="#news">News</a><a href="#events">Events</a><a href="#players">Players</a><a href="#directory">Directory</a><a href="#shop">Shop</a><a href="#watch">Broadcast</a><a href="#analysis">Analysis</a></nav>
 <button class="ghost" id="th" aria-label="Toggle theme">◐</button>
 </header>
 <main id="site"></main>
 <main id="adm" style="display:none"></main>
 <div id="md"><button class="x" onclick="md.style.display='none'">Close ✕</button><div class="g" id="mg" style="max-width:1050px;margin:40px auto 0"></div></div>
-<footer>© <span id="yr"></span> Victory Chess Club · Est. 2023 · <a href="https://wa.me/94713166560">WhatsApp</a> · <a href="#admin">Admin</a></footer>
+<footer>© <span id="yr"></span> Victory Chess Club · Est. 2023 · <a href="https://wa.me/94713166560">WhatsApp</a> · <a href="#admin">Admin</a><br><small>Games and broadcasts from <a href="https://lichess.org" target="_blank" rel="noopener">Lichess.org</a>. Analysis by <a href="https://github.com/nmrugg/stockfish.js" target="_blank" rel="noopener">Stockfish</a> (GPL-3.0), source code available at github.com/nmrugg/stockfish.js.</small></footer>
 
 <script>
 // ====== PUT YOUR SUPABASE DETAILS HERE ======
@@ -76,8 +99,7 @@ news:{n:'News',f:[['title','Title'],['body','Announcement text','area'],['image'
 events:{n:'Events',f:[['title','Event title'],['date','Date'],['description','Description','area'],['photos','Event photos (select many)','files']]},
 players:{n:'Players',f:[['name','Name'],['title','Title (e.g. Captain)'],['description','Short description','area'],['photo','Photo','file']]},
 directory:{n:'Directory',f:[['name','Name'],['title','Title / Role'],['description','Short description','area'],['contact','Contact (phone / email)'],['photo','Photo','file']]},
-shop:{n:'Shop',f:[['name','Item name'],['price','Price (Rs.)'],['description','Description','area'],['photos','Item photos (select many, first is the main photo)','files']]},
-watch:{n:'Watch',f:[['title','Title (e.g. Round 3, Club Championship)'],['date','Date'],['url','Lichess game or study link'],['description','Notes','area']]}
+shop:{n:'Shop',f:[['name','Item name'],['price','Price (Rs.)'],['description','Description','area'],['photos','Item photos (select many, first is the main photo)','files']]}
 };
 const D={};
 const img=u=>u?`<img loading="lazy" src="${esc(u)}" alt="">`:'';
@@ -85,30 +107,97 @@ const ex=(s,n=130)=>{s=String(s??'');return s.length>n?s.slice(0,n).trim()+'…'
 const pics=x=>x.photos&&x.photos.length?x.photos:(x.photo?[x.photo]:(x.image?[x.image]:[]));
 const isP=t=>t=='players'||t=='directory'||t=='shop';
 const WAL=x=>`https://wa.me/${WA}?text=${encodeURIComponent('Hello Victory Chess Club, I want to buy: '+x.name+' (Rs. '+x.price+')')}`;
+const fmtD=ms=>ms?new Date(ms).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'';
 const card=(t,x)=>{const s=x.date||(t=='news'?new Date(x.created_at).toLocaleDateString():(t=='players'||t=='directory'?x.title:''));
  return `<a class="c" href="#${t}/${x.id}">${img(pics(x)[0])}<div><small>${esc(s)}</small><h3>${esc(isP(t)?x.name:x.title)}</h3>${t=='shop'?`<span class="pr">Rs. ${esc(x.price)}</span>`:''}<p>${esc(ex(x.body||x.description))}</p></div></a>`};
-const em=u=>{u=u||'';let m=u.match(/lichess\.org\/study\/(?:embed\/)?(\w{8})(?:\/(\w{8}))?/);if(m)return`https://lichess.org/study/embed/${m[1]}${m[2]?'/'+m[2]:''}?theme=blue&bg=dark`;m=u.match(/lichess\.org\/(?:embed\/game\/)?([A-Za-z0-9]{8})(?:[\/?#]|$)/);return m?`https://lichess.org/embed/game/${m[1]}?theme=blue&bg=dark`:''};
-const fr=u=>u?`<iframe class="fr" src="${esc(u)}" allowfullscreen loading="lazy"></iframe>`:'';
 const grid=(t,k)=>`<div class="g">${(D[t]||[]).slice(0,k).map(x=>card(t,x)).join('')||'<p class="em">Nothing here yet.</p>'}</div>`;
 const sec=(t,k)=>`<section><h2>${T[t].n}</h2>${grid(t,k)}<p><a href="#${t}">See all ${T[t].n} →</a></p></section>`;
-const wl=k=>`<ul class="wl">${(D.watch||[]).slice(0,k).map(x=>`<li>♞ <a href="#watch/${x.id}">${esc(x.title)}</a> <small class="mu">${esc(x.date)}</small></li>`).join('')||'<li class="em">No tournaments yet.</li>'}</ul>`;
-const home=()=>`<div class="hero"><img class="lg" src="logo.png" alt="Victory Chess Club"><p>Welcome to Victory Chess Club. Learn, compete and grow with us.</p><a class="btn" href="#events">See our events</a> <a class="btn ghost" href="#watch">Watch games</a></div>${sec('news',3)}<section><h2>Watch</h2>${wl(6)}<p><a href="#watch">Watch live &amp; tournament games →</a></p></section>${sec('events',3)}${sec('shop',4)}`;
-const det=(t,x)=>{const P=pics(x),late=t=='events'||t=='watch';
- const meta=t=='news'?new Date(x.created_at).toLocaleDateString():t=='events'||t=='watch'?x.date:t=='shop'?'Rs. '+x.price:[x.title,x.contact].filter(Boolean).join(' · ');
- let g='';
- if(t=='shop')g=`<img id="mi" class="mi" src="${esc(P[0]||'')}" alt="">${P.length>1?`<div class="ths">${P.map(u=>`<img class="th" src="${esc(u)}" onclick="mi.src=this.src" alt="">`).join('')}</div>`:''}`;
- else if(t=='events')g=`<div class="g">${P.map(u=>`<div class="c">${img(u)}<div><button onclick="dl('${esc(u)}')">Download</button></div></div>`).join('')}</div>`;
- else if(t=='watch')g=fr(em(x.url))+`<p><a class="btn ghost" target="_blank" rel="noopener" href="${esc(x.url)}">Open on Lichess</a></p>`;
- else if(P[0])g=`<img class="mi" src="${esc(P[0])}" alt="">`;
- return `<section class="art"><a href="#${t}">← ${T[t].n}</a><h1>${esc(isP(t)?x.name:x.title)}</h1><small class="mu">${esc(meta)}</small>${late?'':g}<p class="tx">${esc(x.body||x.description)}</p>${t=='shop'?`<a class="btn" target="_blank" rel="noopener" href="${WAL(x)}">Order on WhatsApp</a>`:''}${late?g:''}</section>`};
-async function load(t){const {data,error}=await sb.from(t).select('*').order('created_at',{ascending:false});D[t]=error?[]:data;if(location.hash!='#admin')show()}
-function show(){const [p,id]=location.hash.slice(1).split('/');if(p=='admin')return;let o;
- if(T[p]&&id){const x=(D[p]||[]).find(v=>v.id==id);o=x?det(p,x):'<section><p class="em">Loading…</p></section>'}
- else if(p=='watch')o=`<section><h2>Watch</h2><p class="mu">Live games from Lichess TV</p>${fr('https://lichess.org/tv/frame?theme=blue&bg=dark')}<h2>Tournaments &amp; Games</h2>${grid('watch',99)}</section>`;
- else if(p=='analysis')o=`<section class="art"><h2>Analysis</h2><p class="tx">Analyse your games with Stockfish, prepare for opponents and learn openings, using the free tools on Lichess.</p><p><a class="btn" target="_blank" rel="noopener" href="https://lichess.org/paste">Import a game (PGN)</a> <a class="btn ghost" target="_blank" rel="noopener" href="https://lichess.org/analysis">Analysis board</a> <a class="btn ghost" target="_blank" rel="noopener" href="https://lichess.org/opening">Opening explorer</a></p></section>`;
+const det=(t,x)=>{const P=pics(x),name=isP(t)?x.name:x.title,tx=esc(x.body||x.description||'');
+ const chip=t=='news'?new Date(x.created_at).toLocaleDateString():t=='events'?x.date:(x.title||'');let b;
+ if(t=='shop')b=`<div class="split"><div><img id="mi" class="mi" src="${esc(P[0]||'')}" alt="">${P.length>1?`<div class="ths">${P.map(u=>`<img class="th" src="${esc(u)}" onclick="mi.src=this.src" alt="">`).join('')}</div>`:''}</div><div><div class="pr big">Rs. ${esc(x.price)}</div><p class="tx">${tx}</p><a class="btn" target="_blank" rel="noopener" href="${WAL(x)}">Order on WhatsApp</a></div></div>`;
+ else if(t=='players'||t=='directory')b=`<div class="prof">${P[0]?`<img class="avt" src="${esc(P[0])}" alt="">`:''}<div><p class="tx">${tx}</p>${x.contact?`<p class="chip">${esc(x.contact)}</p>`:''}</div></div>`;
+ else b=(P[0]&&t=='news'?`<img class="cov" src="${esc(P[0])}" alt="">`:'')+`<p class="tx">${tx}</p>`+(t=='events'?`<div class="g">${P.map(u=>`<div class="c">${img(u)}<div><button onclick="dl('${esc(u)}')">Download</button></div></div>`).join('')}</div>`:'');
+ return `<section class="art"><a class="bk" href="#${t}">← ${T[t].n}</a>${chip?`<div class="chip">${esc(chip)}</div>`:''}<h1>${esc(name)}</h1><hr class="ac">${b}</section>`};
+// ===== chess board + viewer =====
+const PC={k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};let KV=null;
+function drawBoard(el,ch,o){const b=ch.board(),h=[];
+ for(let r=0;r<8;r++)for(let f=0;f<8;f++){const R=o.flip?7-r:r,F=o.flip?7-f:f,p=b[R][F],sq='abcdefgh'[F]+(8-R),c=['sq',(R+F)%2?'d':'l'];
+  if(o.last&&(o.last.from==sq||o.last.to==sq))c.push('lm');if(o.sel==sq)c.push('sel');if(o.hints.includes(sq))c.push('hint');
+  h.push(`<div class="${c.join(' ')}" data-s="${sq}">${p?`<i class="${p.color}">${PC[p.type]}\uFE0E</i>`:''}</div>`)}
+ el.innerHTML=h.join('');el.onclick=o.click?e=>{const s=e.target.closest('.sq');if(s)o.click(s.dataset.s)}:null}
+function viewer(host,sans,opt){const V={sans:sans.slice(),i:sans.length,flip:false,sel:null,fen:null};
+ host.innerHTML='<div class="bw"><div class="evb" hidden><b></b></div><div class="bd"></div></div><div class="ctl">'+[['s','⏮'],['p','◀'],['n','▶'],['e','⏭'],['f','⇅']].map(a=>`<button data-a="${a[0]}" class="ghost">${a[1]}</button>`).join('')+'</div><div class="mv"></div>';
+ const bd=host.querySelector('.bd'),mv=host.querySelector('.mv');KV=V;
+ V.pos=()=>{const c=V.fen?new Chess(V.fen):new Chess();let l=null;for(let k=0;k<V.i;k++)l=c.move(V.sans[k]);V.ch=c;V.last=l;return c};
+ V.play=s=>{V.sans=V.sans.slice(0,V.i);V.sans.push(s);V.i++;V.sel=null;V.draw()};
+ const clk=s=>{const c=V.ch;if(V.sel&&V.sel!=s){const m=c.move({from:V.sel,to:s,promotion:'q'});if(m){V.play(m.san);return}}
+  const p=c.get(s);V.sel=p&&p.color==c.turn()?s:null;V.draw()};
+ V.draw=()=>{V.pos();const hints=V.sel?V.ch.moves({square:V.sel,verbose:true}).map(m=>m.to):[];
+  drawBoard(bd,V.ch,{flip:V.flip,last:V.last,sel:V.sel,hints,click:opt&&opt.edit?clk:null});
+  mv.innerHTML=V.sans.map((s,k)=>`${k%2?'':`<span class="mn">${k/2+1}.</span>`}<a data-k="${k+1}" class="${k+1==V.i?'cur':''}">${esc(s)}</a>`).join(' ')||'<span class="em">No moves yet</span>';
+  const cu=mv.querySelector('.cur');if(cu)mv.scrollTop=cu.offsetTop-mv.clientHeight/2;
+  opt&&opt.onChange&&opt.onChange(V)};
+ host.addEventListener('click',e=>{const a=e.target.dataset;if(a.a){V.sel=null;({s:()=>V.i=0,p:()=>V.i=Math.max(0,V.i-1),n:()=>V.i=Math.min(V.sans.length,V.i+1),e:()=>V.i=V.sans.length,f:()=>V.flip=!V.flip})[a.a]();V.draw()}else if(a.k){V.i=+a.k;V.sel=null;V.draw()}});
+ V.draw();return V}
+addEventListener('keydown',e=>{if(!KV||/input|textarea/i.test(e.target.tagName)||!$('.bd'))return;if(e.key=='ArrowLeft'){KV.i=Math.max(0,KV.i-1);KV.sel=null;KV.draw()}else if(e.key=='ArrowRight'){KV.i=Math.min(KV.sans.length,KV.i+1);KV.sel=null;KV.draw()}});
+// ===== Lichess broadcasts =====
+const LI='https://lichess.org/api/broadcast';let POLL=null;
+const jf=async u=>{const r=await fetch(u);if(!r.ok)throw 0;return r.json()};
+const bcCard=(i,lv)=>{const t=i.tour||{},r=i.round||{};return `<a class="c" href="#watch/${esc(t.id)}">${img(t.image)}<div><small>${lv?'<span class="live">● LIVE</span> ':''}${esc(r.name||'')}${r.startsAt?' · '+fmtD(r.startsAt):''}</small><h3>${esc(t.name)}</h3><p>${esc(ex(t.description||'',110))}</p></div></a>`};
+async function fillHB(){try{const j=await jf(LI+'/top'),L=(j.active||[]).slice(0,3).concat((j.upcoming||[]).slice(0,1)),el=$('#hbg');if(el)el.innerHTML=L.map(i=>bcCard(i,i.round&&i.round.ongoing)).join('')||'<p class="em">No broadcasts right now.</p>'}catch(e){const el=$('#hbg');if(el)el.innerHTML='<p class="em">Broadcasts are unavailable right now.</p>'}}
+async function watchList(s){s.innerHTML='<section><h2>Broadcasts</h2><p class="mu">Live tournaments from around the world. Pick one to follow the games round by round.</p><div id="bl"><p class="em">Loading…</p></div></section>';
+ try{const j=await jf(LI+'/top'),pa=(j.past&&j.past.currentPageResults)||[],blk=(n,L,lv)=>L.length?`<h3 class="sh">${n}</h3><div class="g">${L.map(i=>bcCard(i,lv&&i.round&&i.round.ongoing)).join('')}</div>`:'';
+  const el=$('#bl');if(el)el.innerHTML=blk('Live & recent',j.active||[],1)+blk('Upcoming',j.upcoming||[])+blk('Past',pa)||'<p class="em">No broadcasts found.</p>'}
+ catch(e){const el=$('#bl');if(el)el.innerHTML='<p class="em">Could not load broadcasts. Please try again later.</p>'}}
+async function watchTour(s,tid,rid,gi){s.innerHTML='<section><p class="em">Loading…</p></section>';let j;
+ try{j=await jf(`${LI}/${tid}`)}catch(e){s.innerHTML='<section class="art"><a class="bk" href="#watch">← Broadcasts</a><p class="em">Could not load this tournament.</p></section>';return}
+ const t=j.tour||{},R=j.rounds||[];rid=rid||j.defaultRoundId||(R.find(r=>r.ongoing)||R[R.length-1]||{}).id;
+ s.innerHTML=`<section class="art wide"><a class="bk" href="#watch">← Broadcasts</a><h1>${esc(t.name)}</h1><hr class="ac"><p class="lead">${esc(ex(t.description||'',280))}</p><div class="tabs">${R.map(r=>`<a class="tb${r.id==rid?' on':''}" href="#watch/${tid}/${r.id}">${esc(r.name)}${r.ongoing?' ●':''}</a>`).join('')}</div><div id="bcg"><p class="em">Loading games…</p></div></section>`;
+ const box=$('#bcg');if(!rid){box.innerHTML='<p class="em">No rounds yet.</p>';return}
+ const rd=R.find(r=>r.id==rid)||{},H=(p,k)=>(p.match(new RegExp('\\['+k+' "([^"]*)"'))||[])[1]||'';
+ const get=async()=>(await (await fetch(`${LI}/round/${rid}.pgn`)).text()).split(/\n\s*\n(?=\[Event )/).map(p=>p.trim()).filter(Boolean).map(p=>{const c=new Chess();c.load_pgn(p);return{p,w:H(p,'White'),b:H(p,'Black'),we:H(p,'WhiteElo'),be:H(p,'BlackElo'),r:H(p,'Result')||'*',sans:c.history()}});
+ let G;try{G=await get()}catch(e){G=[]}
+ if(!G.length){box.innerHTML='<p class="em">Games will appear here when the round starts.</p>';return}
+ gi=Math.min(+gi||0,G.length-1);
+ const list=()=>G.map((g,k)=>`<a class="gm${k==gi?' on':''}" href="#watch/${tid}/${rid}/${k}"><span>${esc(g.w)}</span><b>${g.r=='1/2-1/2'?'½':g.r=='*'?'·':esc(g.r)}</b><span>${esc(g.b)}</span></a>`).join('');
+ const g=G[gi];box.innerHTML=`<div class="bcw"><div class="gl">${list()}</div><div><h3 class="gt">${esc(g.w)} ${g.we?'('+esc(g.we)+')':''} vs ${esc(g.b)} ${g.be?'('+esc(g.be)+')':''}</h3><div id="bv"></div><p><button class="ghost" id="an">Analyse this game</button></p></div></div>`;
+ const V=viewer($('#bv'),g.sans);
+ $('#an').onclick=()=>{try{sessionStorage.setItem('pgn',g.p)}catch(e){}location.hash='#analysis'};
+ if(rd.ongoing)POLL=setInterval(async()=>{try{const N=await get(),at=V.i==V.sans.length;N.forEach((n,k)=>{if(G[k])G[k].r=n.r;else G[k]=n});if(N[gi]){V.sans=N[gi].sans;if(at)V.i=V.sans.length;V.draw()}$('.gl').innerHTML=list()}catch(e){}},12000)}
+// ===== analysis (Stockfish in the browser) =====
+const OPN=new Map();let opL=false,EW=null,run=false,pend=null,EI={};
+async function loadOpn(){if(opL)return;opL=true;try{await Promise.all('abcde'.split('').map(async f=>{const t=await (await fetch(`https://cdn.jsdelivr.net/gh/lichess-org/chess-openings@master/${f}.tsv`)).text();t.split('\n').slice(1).forEach(l=>{const [e,n,p]=l.split('\t');if(p)OPN.set(p.replace(/\d+\.\s*/g,'').trim(),e+' · '+n)})}))}catch(e){}}
+const opName=V=>{if(V.fen)return '';for(let k=V.i;k>0;k--){const n=OPN.get(V.sans.slice(0,k).join(' '));if(n)return n}return ''};
+function engInit(){if(EW)return;try{EW=new Worker('engine/stockfish-19-lite-single.js');EW.onerror=()=>{EW=null;const l=$('#ln');if(l)l.innerHTML='<small class="mu">The engine is unavailable right now.</small>'};EW.onmessage=e=>eng(String(e.data));EW.postMessage('uci');EW.postMessage('setoption name MultiPV value 3')}catch(e){EW=null}}
+function analyse(fen){const l=$('#ln');if(!EW){return}if(!fen){pend=null;if(run)EW.postMessage('stop');if(l)l.innerHTML='<small class="mu">Game over</small>';return}pend=fen;if(run)EW.postMessage('stop');else go()}
+function go(){if(!pend)return;const f=pend;pend=null;run=true;EI={fen:f,lines:{}};EW.postMessage('position fen '+f);EW.postMessage('go depth 20')}
+function eng(m){if(m.startsWith('bestmove')){run=false;if(pend)go();return}
+ if(m.startsWith('info')&&m.includes(' pv ')&&run){const sc=m.match(/score (cp|mate) (-?\d+)/);if(!sc)return;const d=+(m.match(/ depth (\d+)/)||[])[1],k=+(m.match(/multipv (\d+)/)||[,1])[1];EI.lines[k]={d,t:sc[1],v:+sc[2],pv:m.split(' pv ')[1].trim().split(' ')};showLines()}}
+function showLines(){const l=$('#ln');if(!l)return;const w=EI.fen.split(' ')[1]=='w',h=[];let top=null;
+ Object.keys(EI.lines).sort().forEach(k=>{const x=EI.lines[k],v=w?x.v:-x.v,c=new Chess(EI.fen),san=[];
+  for(const u of x.pv.slice(0,8)){const m=c.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]});if(!m)break;san.push(m.san)}
+  if(!top)top=x.t=='mate'?(v>0?1000:-1000):v;
+  h.push(`<div class="ln"><b>${x.t=='mate'?(v>0?'+':'-')+'M'+Math.abs(x.v):(v>=0?'+':'')+(v/100).toFixed(2)}</b> <a data-m="${esc(san[0]||'')}">${esc(san.join(' '))}</a> <small class="mu">d${x.d}</small></div>`)});
+ l.innerHTML=h.join('');const b=document.querySelector('.evb b');if(b&&top!=null)b.style.height=(50+50*Math.tanh(top/500))+'%'}
+function analysisPage(s){s.innerHTML=`<section class="art wide"><h1>Analysis</h1><hr class="ac"><p class="lead">Play moves on the board, step through a game, and see Stockfish's evaluation and best lines. Paste a game (PGN) or a position (FEN) to study it.</p><div class="an"><div id="av"></div><div><div class="opn" id="op"></div><div id="ln" class="lines"><small class="mu">Engine starting…</small></div><textarea id="pg" rows="5" placeholder="Paste PGN or FEN here"></textarea><button id="ld">Load</button> <button class="ghost" id="nb">New board</button></div></div></section>`;
+ let sans=[],pg=null;try{pg=sessionStorage.getItem('pgn');sessionStorage.removeItem('pgn')}catch(e){}
+ if(pg){const c=new Chess();if(c.load_pgn(pg))sans=c.history()}
+ let tm;const V=viewer($('#av'),sans,{edit:1,onChange:v=>{$('#op').textContent=opName(v);clearTimeout(tm);tm=setTimeout(()=>analyse(v.ch.game_over()?null:v.ch.fen()),250)}});
+ document.querySelector('.evb').hidden=false;loadOpn().then(()=>V.draw());engInit();
+ $('#ln').onclick=e=>{const m=e.target.dataset.m;if(m){try{V.play(m)}catch(x){}}};
+ $('#ld').onclick=()=>{const t=$('#pg').value.trim();if(!t)return;const c=new Chess();
+  if(c.load(t)){V.fen=t;V.sans=[];V.i=0}else if(c.load_pgn(t)){V.fen=null;V.sans=c.history();V.i=V.sans.length}else{alert('That is not a valid PGN or FEN.');return}V.draw()};
+ $('#nb').onclick=()=>{V.fen=null;V.sans=[];V.i=0;V.draw()}}
+async function load(t){const {data,error}=await sb.from(t).select('*').order('created_at',{ascending:false});D[t]=error?[]:data;if(!/^#(admin|watch|analysis)/.test(location.hash))show()}
+function show(){clearInterval(POLL);KV=null;if(EW&&run){pend=null;EW.postMessage('stop')}
+ const [p,a,b,c]=location.hash.slice(1).split('/');if(p=='admin')return;const s=$('#site');
+ document.querySelectorAll('nav a').forEach(n=>n.classList.toggle('on',n.getAttribute('href')=='#'+p));
+ if(p=='watch'){a?watchTour(s,a,b,c):watchList(s);return}
+ if(p=='analysis'){analysisPage(s);return}
+ let o;if(T[p]&&a){const x=(D[p]||[]).find(v=>v.id==a);o=x?det(p,x):'<section><p class="em">Loading…</p></section>'}
  else if(T[p])o=`<section><h2>${T[p].n}</h2>${grid(p,999)}</section>`;
- else o=home();
- $('#site').innerHTML=o}
+ else{o=`<div class="hero"><img class="lg" src="logo.png" alt="Victory Chess Club"><p>Welcome to Victory Chess Club. Learn, compete and grow with us.</p><a class="btn" href="#events">See our events</a> <a class="btn ghost" href="#watch">Watch broadcasts</a> <a class="btn ghost" href="#analysis">Analyse a game</a></div>${sec('news',3)}<section><h2>Broadcasts</h2><div class="g" id="hbg"><p class="em">Loading…</p></div><p><a href="#watch">All live tournaments →</a></p></section>${sec('events',3)}${sec('players',4)}${sec('directory',4)}${sec('shop',4)}<section><h2>Analysis Board</h2><p class="mu">Study your games and prepare for opponents with Stockfish, right here.</p><a class="btn" href="#analysis">Open the board</a></section>`;setTimeout(fillHB,0)}
+ s.innerHTML=o}
 async function dl(u){
  try{const b=await (await fetch(u)).blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=u.split('/').pop();a.click()}
  catch(e){window.open(u,'_blank')}
@@ -168,6 +257,5 @@ addEventListener('hashchange',route);
 Object.keys(T).forEach(load);
 route();
 </script>
-
 </body>
 </html>
